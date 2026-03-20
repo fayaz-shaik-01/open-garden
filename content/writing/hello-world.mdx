@@ -1,0 +1,63 @@
+---
+title: "Building a Personal Operating System on the Web"
+date: "2024-12-20"
+summary: "Why I built my personal website as an app-like experience instead of a traditional portfolio, and the technical decisions behind it."
+tags: ["engineering", "nextjs", "design"]
+published: true
+---
+
+# Building a Personal Operating System on the Web
+
+I've always been fascinated by the idea of treating a personal website as more than just a static page. Instead of the typical portfolio layout, I wanted something that felt like a **personal operating system** — a place where I could organize my thoughts, writing, projects, and bookmarks in a way that felt natural and fast.
+
+## Why Not a Traditional Portfolio?
+
+Most portfolio sites follow the same pattern: hero section, about me, projects grid, contact form. They're fine for a first impression, but they don't encourage regular content creation or exploration.
+
+What I wanted was:
+
+- **Fast navigation** between different types of content
+- **Easy content creation** without touching code for every update
+- **A system that grows** with me over time
+
+## The Technical Stack
+
+Here's what I landed on:
+
+```typescript
+const stack = {
+  framework: "Next.js 14 (App Router)",
+  language: "TypeScript",
+  styling: "Tailwind CSS",
+  content: "MDX + Notion API",
+  deployment: "Vercel",
+};
+```
+
+### MDX for Long-Form Writing
+
+Blog posts like this one are written in MDX — Markdown with JSX support. This gives me the best of both worlds: the simplicity of Markdown for writing, with the ability to embed interactive components when needed.
+
+### Notion as a CMS
+
+For shorter content like notes, project entries, and bookmarks, I use Notion as a headless CMS. The Notion API makes it easy to query databases and render content on the site. This means I can add a new note or bookmark from my phone and it appears on the site automatically.
+
+## The Layout System
+
+The most important design decision was the **list-detail pattern**. Inspired by apps like Apple Mail and Slack, the layout uses:
+
+1. A persistent sidebar for navigation
+2. A scrollable list of items
+3. A detail view for the selected item
+
+This creates an app-like feel that encourages exploration rather than linear reading.
+
+## Key Lessons
+
+1. **Treat your site like a product.** Think about user flows, not just pages.
+2. **Make content creation frictionless.** The easier it is to publish, the more you'll write.
+3. **Start minimal and iterate.** You don't need every feature on day one.
+
+---
+
+*This site is open source. Feel free to fork it and make it your own.*

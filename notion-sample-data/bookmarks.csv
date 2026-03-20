@@ -1,0 +1,13 @@
+Title,URL,Description,Tags,Date
+"The Art of Debugging","https://jvns.ca/blog/2022/12/21/new-talk--what-s-actually-happening-on-your-computer/","Julia Evans' fantastic talk on understanding what's actually happening on your computer when you debug software.","engineering,debugging","2024-12-12"
+"Designing Data-Intensive Applications","https://dataintensive.net","Martin Kleppmann's essential book on the principles behind reliable, scalable, and maintainable data systems.","architecture,books","2024-11-30"
+"Modern CSS Reset by Andy Bell","https://piccalil.li/blog/a-more-modern-css-reset/","A sensible modern CSS reset with detailed explanations for each rule. Minimal and practical.","css,frontend","2024-11-15"
+"PostgreSQL Performance Tips","https://www.crunchydata.com/blog/postgresql-performance-tips","Practical tips for optimizing PostgreSQL queries, indexing strategies, and configuration tuning.","database,performance","2024-10-28"
+"Build Your Own Redis","https://build-your-own.org/redis/","Step-by-step guide to building a Redis clone from scratch in C. Great way to understand networking and data structures.","systems,tutorials","2024-10-15"
+"The Twelve-Factor App","https://12factor.net","A methodology for building modern, scalable, maintainable SaaS applications. Essential reading for backend developers.","architecture,devops","2024-09-20"
+"Tailwind CSS Best Practices","https://www.youtube.com/watch?v=QBajvZaWLXs","Simon Swiss demonstrates advanced Tailwind CSS patterns for building production-grade UI components.","css,tailwind,videos","2024-09-10"
+"Rust for TypeScript Developers","https://www.shuttle.rs/blog/2023/12/28/rust-for-typescript-devs","A practical comparison of Rust and TypeScript concepts. Helps TS developers learn Rust by mapping familiar patterns.","rust,typescript","2024-08-25"
+"How DNS Works","https://howdns.works","A fun and colorful comic explaining DNS resolution step by step. Great for visual learners.","networking,fundamentals","2024-08-10"
+"Crafting Interpreters","https://craftinginterpreters.com","Bob Nystrom's free online book on building programming languages. Covers both tree-walk and bytecode interpreters.","compilers,books","2024-07-15"
+"System Design Primer","https://github.com/donnemartin/system-design-primer","A comprehensive collection of system design resources, interview prep, and real-world architecture examples.","architecture,interviews","2024-07-01"
+"htmx — High Power Tools for HTML","https://htmx.org","A library that lets you access modern browser features directly from HTML. No JavaScript needed for many interactive patterns.","html,libraries","2024-06-15"
