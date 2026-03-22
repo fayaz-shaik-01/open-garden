@@ -16,21 +16,21 @@ const skills = [
 const experience = [
   {
     role: "Senior Software Engineer",
-    company: "Acme Corp",
+    company: "Tech Company",
     period: "2022 – Present",
     description:
       "Leading frontend architecture and building developer tools. Working on design systems, performance optimization, and developer experience.",
   },
   {
     role: "Software Engineer",
-    company: "StartupXYZ",
+    company: "Startup",
     period: "2020 – 2022",
     description:
       "Built and shipped core product features from scratch. Led migration from REST to GraphQL, reducing API response times by 40%.",
   },
   {
     role: "Junior Developer",
-    company: "WebAgency",
+    company: "Digital Agency",
     period: "2018 – 2020",
     description:
       "Developed client websites and web applications. Introduced automated testing practices to the team.",

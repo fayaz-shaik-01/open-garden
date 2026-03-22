@@ -16,10 +16,6 @@ export const siteConfig = {
   },
   nav: [
     { label: "Home", href: "/" },
-    { label: "Writing", href: "/writing" },
-    { label: "Notes", href: "/notes" },
-    { label: "Projects", href: "/projects" },
-    { label: "Bookmarks", href: "/bookmarks" },
     { label: "About", href: "/about" },
   ],
 };

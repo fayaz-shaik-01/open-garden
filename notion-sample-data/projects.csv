@@ -1,7 +1,0 @@
-Name,Excerpt,Tags,Status,Published Date
-"DevFlow — Developer Dashboard","A developer productivity dashboard that integrates with GitHub, Jira, and Slack to provide a unified view of your development workflow. Built with real-time updates and customizable widgets.","Next.js,TypeScript,Prisma,PostgreSQL,WebSocket","Published","2024-11-01"
-"MarkdownMail","Write emails in Markdown and send them beautifully formatted. Supports templates, scheduled sending, and a clean distraction-free writing experience with live preview.","React,Node.js,SendGrid,MDX","Published","2024-09-15"
-"APIBench","A lightweight API benchmarking tool that helps you measure response times, throughput, and reliability of your REST and GraphQL endpoints. Generates beautiful HTML reports with charts.","Go,React,D3.js,SQLite","Published","2024-07-20"
-"Dotfiles Manager","A CLI tool for managing and syncing dotfiles across machines. Supports encrypted secrets, machine-specific configs, and automatic backup to a git repository.","Rust,TOML,Shell","Published","2024-05-10"
-"Notecraft","A local-first note-taking app with Markdown support, backlinks, graph view, and full-text search. Inspired by Obsidian but built as a web app with offline-first architecture.","SvelteKit,SQLite,IndexedDB,TypeScript","Published","2024-03-22"
-"PixelSort","An image glitch art tool that applies pixel sorting algorithms to photos. Choose from various sorting modes (brightness, hue, saturation) and apply masks for selective effects.","Python,NumPy,Pillow,FastAPI,React","Draft","2024-01-15"

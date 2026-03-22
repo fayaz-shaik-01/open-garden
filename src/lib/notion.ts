@@ -1,4 +1,5 @@
 import { Client } from "@notionhq/client";
+import { getAllDatabases, getDatabaseItems } from "./notion-discovery";
 
 const notion = new Client({
   auth: process.env.NOTION_API_KEY,
@@ -88,7 +89,134 @@ function getFiles(prop: any): string {
 // ─── Check if Notion is configured ──────────────────────────────────────────
 
 export function isNotionConfigured(): boolean {
-  return !!(process.env.NOTION_API_KEY && (NOTES_DB || PROJECTS_DB || BOOKMARKS_DB));
+  return !!process.env.NOTION_API_KEY;
+}
+
+// ─── Auto-discovery functions ────────────────────────────────────────────────
+
+export async function getNotesFromDiscovery(): Promise<Note[]> {
+  try {
+    const databases = await getAllDatabases();
+    const notesDatabase = databases.find(db => 
+      db.type === "notes" || 
+      db.title.toLowerCase().includes("note")
+    );
+    
+    if (!notesDatabase) return getFallbackNotes();
+    
+    const items = await getDatabaseItems(notesDatabase.id);
+    
+    return items.map(item => ({
+      id: item.id,
+      title: item.title,
+      content: extractContent(item.properties),
+      tags: extractTags(item.properties),
+      date: extractDate(item.properties) || item.created_time,
+    }));
+  } catch (error) {
+    console.error("Failed to fetch notes from discovery:", error);
+    return getFallbackNotes();
+  }
+}
+
+export async function getProjectsFromDiscovery(): Promise<Project[]> {
+  try {
+    const databases = await getAllDatabases();
+    const projectsDatabase = databases.find(db => 
+      db.type === "projects" || 
+      db.title.toLowerCase().includes("project")
+    );
+    
+    if (!projectsDatabase) return getFallbackProjects();
+    
+    const items = await getDatabaseItems(projectsDatabase.id);
+    
+    return items.map(item => ({
+      id: item.id,
+      name: item.title,
+      description: extractContent(item.properties) || "",
+      url: extractUrl(item.properties) || "",
+      github: "",
+      stack: extractTags(item.properties),
+      featured: false,
+      date: extractDate(item.properties) || item.created_time,
+      cover: "",
+      status: "Published",
+    }));
+  } catch (error) {
+    console.error("Failed to fetch projects from discovery:", error);
+    return getFallbackProjects();
+  }
+}
+
+export async function getBookmarksFromDiscovery(): Promise<BookmarkItem[]> {
+  try {
+    const databases = await getAllDatabases();
+    const bookmarksDatabase = databases.find(db => 
+      db.type === "bookmarks" || 
+      db.title.toLowerCase().includes("bookmark")
+    );
+    
+    if (!bookmarksDatabase) return getFallbackBookmarks();
+    
+    const items = await getDatabaseItems(bookmarksDatabase.id);
+    
+    return items.map(item => ({
+      id: item.id,
+      title: item.title,
+      url: extractUrl(item.properties) || "",
+      description: extractContent(item.properties) || "",
+      tags: extractTags(item.properties),
+      date: extractDate(item.properties) || item.created_time,
+    }));
+  } catch (error) {
+    console.error("Failed to fetch bookmarks from discovery:", error);
+    return getFallbackBookmarks();
+  }
+}
+
+// ─── Helper extraction functions ─────────────────────────────────────────────
+
+function extractContent(properties: Record<string, any>): string {
+  for (const [key, value] of Object.entries(properties)) {
+    if ((value as any).rich_text?.length) {
+      return (value as any).rich_text.map((t: any) => t.plain_text).join("");
+    }
+    if ((value as any).title?.length) {
+      return (value as any).title.map((t: any) => t.plain_text).join("");
+    }
+  }
+  return "";
+}
+
+function extractTags(properties: Record<string, any>): string[] {
+  for (const [key, value] of Object.entries(properties)) {
+    if ((value as any).multi_select?.length) {
+      return (value as any).multi_select.map((s: any) => s.name);
+    }
+    if ((value as any).select?.name) {
+      return [(value as any).select.name];
+    }
+  }
+  return [];
+}
+
+function extractDate(properties: Record<string, any>): string {
+  for (const [key, value] of Object.entries(properties)) {
+    if ((value as any).date?.start) {
+      return (value as any).date.start;
+    }
+  }
+  return "";
+}
+
+function extractUrl(properties: Record<string, any>): string {
+  for (const [key, value] of Object.entries(properties)) {
+    if ((value as any).url) {
+      return (value as any).url;
+    }
+  }
+  return "";
 }
 
 // ─── Fetch page body content (blocks) ───────────────────────────────────────
@@ -172,6 +300,19 @@ export async function getPageContent(pageId: string): Promise<NotionBlock[]> {
 // ─── Notes ───────────────────────────────────────────────────────────────────
 
 export async function getNotes(): Promise<Note[]> {
+  // Try discovery first, fallback to legacy method
+  if (process.env.NOTION_API_KEY) {
+    try {
+      const discoveredNotes = await getNotesFromDiscovery();
+      if (discoveredNotes.length > 0) {
+        return discoveredNotes;
+      }
+    } catch (error) {
+      console.warn("Discovery failed, trying legacy method:", error);
+    }
+  }
+  
+  // Legacy method
   if (!NOTES_DB || !process.env.NOTION_API_KEY || NOTES_DB === PROJECTS_DB) return getFallbackNotes();
 
   try {
@@ -220,6 +361,19 @@ export async function getNoteById(id: string): Promise<Note | null> {
 // ─── Projects ────────────────────────────────────────────────────────────────
 
 export async function getProjects(): Promise<Project[]> {
+  // Try discovery first, fallback to legacy method
+  if (process.env.NOTION_API_KEY) {
+    try {
+      const discoveredProjects = await getProjectsFromDiscovery();
+      if (discoveredProjects.length > 0) {
+        return discoveredProjects;
+      }
+    } catch (error) {
+      console.warn("Discovery failed, trying legacy method:", error);
+    }
+  }
+  
+  // Legacy method
   if (!PROJECTS_DB || !process.env.NOTION_API_KEY) return getFallbackProjects();
 
   try {
@@ -278,6 +432,19 @@ export async function getProjectById(id: string): Promise<Project | null> {
 // ─── Bookmarks ───────────────────────────────────────────────────────────────
 
 export async function getBookmarks(): Promise<BookmarkItem[]> {
+  // Try discovery first, fallback to legacy method
+  if (process.env.NOTION_API_KEY) {
+    try {
+      const discoveredBookmarks = await getBookmarksFromDiscovery();
+      if (discoveredBookmarks.length > 0) {
+        return discoveredBookmarks;
+      }
+    } catch (error) {
+      console.warn("Discovery failed, trying legacy method:", error);
+    }
+  }
+  
+  // Legacy method
   if (!BOOKMARKS_DB || !process.env.NOTION_API_KEY || BOOKMARKS_DB === PROJECTS_DB) return getFallbackBookmarks();
 
   try {
@@ -303,140 +470,13 @@ export async function getBookmarks(): Promise<BookmarkItem[]> {
 // ─── Fallback Data ───────────────────────────────────────────────────────────
 
 function getFallbackNotes(): Note[] {
-  return [
-    {
-      id: "note-1",
-      title: "TypeScript Mapped Types",
-      content:
-        "Mapped types in TypeScript let you create new types based on old ones by transforming properties. Use `keyof` with mapped types to iterate over property keys and apply transformations like making all properties optional or readonly.",
-      tags: ["typescript", "programming"],
-      date: "2024-12-15",
-    },
-    {
-      id: "note-2",
-      title: "React Server Components",
-      content:
-        "RSCs run exclusively on the server and never ship JavaScript to the client. They can directly access databases, file systems, and other server-side resources. Use 'use client' directive only for interactive components.",
-      tags: ["react", "nextjs"],
-      date: "2024-12-10",
-    },
-    {
-      id: "note-3",
-      title: "CSS Container Queries",
-      content:
-        "Container queries allow you to style elements based on the size of their containing element rather than the viewport. Use @container to define responsive styles that adapt to component context.",
-      tags: ["css", "frontend"],
-      date: "2024-12-05",
-    },
-    {
-      id: "note-4",
-      title: "Git Interactive Rebase",
-      content:
-        "Use `git rebase -i HEAD~n` to interactively rebase the last n commits. You can squash, reorder, edit, or drop commits. Great for cleaning up commit history before merging.",
-      tags: ["git", "tooling"],
-      date: "2024-11-28",
-    },
-    {
-      id: "note-5",
-      title: "Postgres JSONB Indexing",
-      content:
-        "GIN indexes on JSONB columns in PostgreSQL dramatically speed up containment queries (@>) and existence checks (?). Use `CREATE INDEX idx ON table USING GIN (column)` for best results.",
-      tags: ["database", "postgres"],
-      date: "2024-11-20",
-    },
-  ];
+  return [];
 }
 
-function getFallbackProjects(): Project[] {
-  return [
-    {
-      id: "project-1",
-      name: "DevFlow",
-      description:
-        "A developer productivity dashboard that integrates with GitHub, Jira, and Slack to provide a unified view of your development workflow. Built with real-time updates and customizable widgets.",
-      url: "https://devflow.example.com",
-      github: "https://github.com/shahbazfayaz/devflow",
-      stack: ["Next.js", "TypeScript", "Prisma", "PostgreSQL", "WebSocket"],
-      featured: true,
-      date: "2024-11-01",
-      cover: "",
-      status: "Published",
-    },
-    {
-      id: "project-2",
-      name: "MarkdownMail",
-      description:
-        "Write emails in Markdown and send them beautifully formatted. Supports templates, scheduled sending, and a clean distraction-free writing experience.",
-      url: "https://markdownmail.example.com",
-      github: "https://github.com/shahbazfayaz/markdownmail",
-      stack: ["React", "Node.js", "SendGrid", "MDX"],
-      featured: true,
-      date: "2024-09-15",
-      cover: "",
-      status: "Published",
-    },
-    {
-      id: "project-3",
-      name: "APIBench",
-      description:
-        "A lightweight API benchmarking tool that helps you measure response times, throughput, and reliability of your REST and GraphQL endpoints with beautiful reports.",
-      url: "",
-      github: "https://github.com/shahbazfayaz/apibench",
-      stack: ["Go", "React", "D3.js", "SQLite"],
-      featured: false,
-      date: "2024-07-20",
-      cover: "",
-      status: "Published",
-    },
-    {
-      id: "project-4",
-      name: "Dotfiles Manager",
-      description:
-        "A CLI tool for managing and syncing dotfiles across machines. Supports encrypted secrets, machine-specific configs, and automatic backup to git.",
-      url: "",
-      github: "https://github.com/shahbazfayaz/dotfiles-manager",
-      stack: ["Rust", "TOML", "Shell"],
-      featured: false,
-      date: "2024-05-10",
-      cover: "",
-      status: "Published",
-    },
-  ];
+function getFallbackProjects(): ProjectItem[] {
+  return [];
 }
 
 function getFallbackBookmarks(): BookmarkItem[] {
-  return [
-    {
-      id: "bookmark-1",
-      title: "The Art of Debugging",
-      url: "https://example.com/art-of-debugging",
-      description: "A comprehensive guide to systematic debugging techniques for modern software systems.",
-      tags: ["engineering", "debugging"],
-      date: "2024-12-12",
-    },
-    {
-      id: "bookmark-2",
-      title: "Designing Data-Intensive Applications",
-      url: "https://dataintensive.net",
-      description: "Martin Kleppmann's essential book on the principles behind reliable, scalable systems.",
-      tags: ["architecture", "books"],
-      date: "2024-11-30",
-    },
-    {
-      id: "bookmark-3",
-      title: "Modern CSS Reset",
-      url: "https://example.com/modern-css-reset",
-      description: "A sensible modern CSS reset with explanations for each rule.",
-      tags: ["css", "frontend"],
-      date: "2024-11-15",
-    },
-    {
-      id: "bookmark-4",
-      title: "Postgres Performance Tips",
-      url: "https://example.com/postgres-performance",
-      description: "Practical tips for optimizing PostgreSQL queries and configuration.",
-      tags: ["database", "performance"],
-      date: "2024-10-28",
-    },
-  ];
+  return [];
 }
